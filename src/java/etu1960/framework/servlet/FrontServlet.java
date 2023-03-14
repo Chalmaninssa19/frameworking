@@ -4,12 +4,17 @@
  */
 package etu1960.framework.servlet;
 
+import etu1960.framework.Mapping;
+import etu1960.framework.annotation.Method;
+import etu1960.reflect.Reflect;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  *
@@ -26,6 +31,7 @@ public class FrontServlet extends HttpServlet {
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
+    HashMap<String, Mapping> mappingUrls;
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) //toutes les requetes pointent vers ce fonction
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
@@ -45,7 +51,53 @@ public class FrontServlet extends HttpServlet {
             out.println("</body>");
          }
     }
+    
+    public void init() {
+        try {
+            ArrayList<Class<?>> allClass = Reflect.getAllClass();   //Recueperer toutes les classes du package model
+            HashMap <String, Mapping> hashLists = new HashMap<>();  //Instanciation d'un hashMap
+            for(int i = 0; i < allClass.size(); i++) { 
+                if(allClass.get(i) != null) {   //S'il y a au moins une classe
+                    insertHashMap(hashLists, allClass.get(i));  //Inserer dans hashLists les donnees HashMap
+                }
+            }
+                
+            display(hashLists); //Afficher le hashMap
+          
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
 
+///Getters et setters
+    public HashMap<String, Mapping> getMappingUrls() {
+        return mappingUrls;
+    }
+
+    public void setMappingUrls(HashMap<String, Mapping> mappingUrls) {
+        this.mappingUrls = mappingUrls;
+    }
+   
+///Fonctions
+    //inserer les donnees dans hashMap
+    public void insertHashMap(HashMap<String, Mapping> hashLists, Class<?> className) {
+        for(int i = 0; i < className.getDeclaredMethods().length; i++) {
+            if(Reflect.isMethodAnnotated(className, className.getDeclaredMethods()[i].getName(), Method.class)) {                 
+                String url = className.getDeclaredMethods()[i].getAnnotation(Method.class).url();
+                hashLists.put(url, new Mapping(className.getName(), className.getDeclaredMethods()[i].getName()));
+            }
+        }
+    }
+    
+    //Afficher le HashMap dans l'argument
+    public void display(HashMap<String, Mapping> hashLists) {
+        for ( HashMap.Entry<String, Mapping> entry : hashLists.entrySet()) {
+            System.out.println("Nom de url : " + entry.getKey());
+            System.out.println("Nom du classe : " + entry.getValue().getClassName());
+            System.out.println("Nom du methode : " + entry.getValue().getMethod());
+        }
+    }
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
      * Handles the HTTP <code>GET</code> method.
@@ -84,5 +136,4 @@ public class FrontServlet extends HttpServlet {
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
-
 }
