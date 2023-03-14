@@ -28,7 +28,9 @@ public class FrontServlet extends HttpServlet {
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
+
     HashMap<String, Mapping> mappingUrls;
+    
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) //toutes les requetes pointent vers ce fonction
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
@@ -58,7 +60,6 @@ public class FrontServlet extends HttpServlet {
     public void setMappingUrls(HashMap<String, Mapping> mappingUrls) {
         this.mappingUrls = mappingUrls;
     }
-    
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
