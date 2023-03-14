@@ -31,6 +31,7 @@ public class FrontServlet extends HttpServlet {
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
+
     HashMap<String, Mapping> mappingUrls;
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) //toutes les requetes pointent vers ce fonction
             throws ServletException, IOException {
@@ -52,6 +53,7 @@ public class FrontServlet extends HttpServlet {
          }
     }
     
+
     public void init() {
         try {
             ArrayList<Class<?>> allClass = Reflect.getAllClass();   //Recueperer toutes les classes du package model
@@ -69,6 +71,16 @@ public class FrontServlet extends HttpServlet {
         }
     }
     
+    //Getters et setters
+
+    public HashMap<String, Mapping> getMappingUrls() {
+        return mappingUrls;
+    }
+
+    public void setMappingUrls(HashMap<String, Mapping> mappingUrls) {
+        this.mappingUrls = mappingUrls;
+    }
+
 
 ///Getters et setters
     public HashMap<String, Mapping> getMappingUrls() {
