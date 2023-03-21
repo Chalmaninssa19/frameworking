@@ -63,34 +63,14 @@ public class FrontServlet extends HttpServlet {
                     insertHashMap(hashLists, allClass.get(i));  //Inserer dans hashLists les donnees HashMap
                 }
             }
-                
-            display(hashLists); //Afficher le hashMap
+            this.mappingUrls = hashLists; 
+            display(this.mappingUrls); //Afficher le hashMap
           
         } catch(Exception e) {
             e.printStackTrace();
         }
     }
-    
-    //Getters et setters
-
-    public HashMap<String, Mapping> getMappingUrls() {
-        return mappingUrls;
-    }
-
-    public void setMappingUrls(HashMap<String, Mapping> mappingUrls) {
-        this.mappingUrls = mappingUrls;
-    }
-
-
-///Getters et setters
-    public HashMap<String, Mapping> getMappingUrls() {
-        return mappingUrls;
-    }
-
-    public void setMappingUrls(HashMap<String, Mapping> mappingUrls) {
-        this.mappingUrls = mappingUrls;
-    }
-   
+ 
 ///Fonctions
     //inserer les donnees dans hashMap
     public void insertHashMap(HashMap<String, Mapping> hashLists, Class<?> className) {
