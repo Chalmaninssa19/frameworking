@@ -1,0 +1,1 @@
+jar -cvf /home/chalman/NetBeansProjects/testFramework/Libraries/framework.jar /home/chalman/NetBeansProjects/frameworking/src/
