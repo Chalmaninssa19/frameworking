@@ -4,7 +4,6 @@
  * and open the template in the editor.
  */
 package etu1960.framework.modelView;
-
 import java.util.HashMap;
 
 /**
@@ -43,7 +42,6 @@ public class ModelView {
     
 ///Fonctions
     public void addItem(String key, Object value) { //Ajouter un element
-        getDatas().put(key, value);
-        
+        getDatas().put(key, value); 
     }  
 }

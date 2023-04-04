@@ -4,8 +4,11 @@
     Author     : Chalman
 --%>
 
+<<<<<<< HEAD
 <%@page import="java.util.List"%>
 <%@page import="java.util.ArrayList"%>
+=======
+>>>>>>> main
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html>
@@ -15,6 +18,7 @@
     </head>
     <body>
         <h1>WELCOME TO EMPLOYE!</h1>
+<<<<<<< HEAD
         <% if(request.getAttribute("date") != null) { %>
         <p>Date : <%=request.getAttribute("date") %></p>
         <% } 
@@ -28,5 +32,7 @@
             <% } %>
         </ul>
         <% } %>
+=======
+>>>>>>> main
     </body>
 </html>

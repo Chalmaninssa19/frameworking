@@ -56,6 +56,7 @@ public class FrontServlet extends HttpServlet {
                     for(int i = 0; i < allClass.size(); i++) {
                         if(allClass.get(i).getName().equals(this.mappingUrls.get(view).getClassName())) {
                             java.lang.reflect.Method method =  (java.lang.reflect.Method)allClass.get(i).getDeclaredMethod(this.mappingUrls.get(view).getMethod(), new Class[0]);
+
                             ModelView modelView = (ModelView)method.invoke(allClass.get(i).newInstance(), new Object[0]);
                             String viewName =  modelView.getUrl();
                             System.out.println("tonga -> " + modelView.getDatas());
@@ -63,6 +64,8 @@ public class FrontServlet extends HttpServlet {
                             for ( HashMap.Entry<String, Object> data : datas.entrySet()) {
                                 request.setAttribute(data.getKey(), data.getValue());
                             }
+                            ModelView modelView = (ModelView)method.invoke(allClass.get(0).newInstance(), new Object[0]);
+                            String viewName =  modelView.getView();
                             RequestDispatcher dispat = request.getRequestDispatcher("/pages/" + viewName);
                             dispat.forward(request, response);
                         }
