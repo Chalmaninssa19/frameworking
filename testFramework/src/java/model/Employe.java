@@ -5,6 +5,9 @@
 package model;
 
 import etu1960.framework.annotation.Method;
+import etu1960.framework.modelView.ModelView;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  *
@@ -54,8 +57,6 @@ public class Employe {
         this.salaire = salaire;
     }
 
-    
-    
     ///Focntions de la classe
     @Method(url = "getNom")
     public void nom() {
@@ -70,5 +71,25 @@ public class Employe {
     @Method(url = "getsalaire")
     public void salaire() {
         System.out.println(this.getSalaire());
+    }
+
+    @Method(url="getEmploye")
+    public ModelView getEmploye() {
+        ModelView view = new ModelView("employe.jsp");
+        view.addItem("listes", listsEmploye());
+      
+        String date = "2022-06-19";
+        view.addItem("date", date);
+  
+        return view;
+    }
+    
+    public ArrayList<String> listsEmploye() {
+        ArrayList<String> lists = new ArrayList<>();
+        lists.add("Bema");
+        lists.add("Frank");
+        lists.add("Irving");
+        
+        return lists;
     }
 }
