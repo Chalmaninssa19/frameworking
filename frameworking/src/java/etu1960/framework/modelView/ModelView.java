@@ -5,8 +5,6 @@
  */
 package etu1960.framework.modelView;
 
-import etu1960.framework.annotation.Method;
-
 /**
  *
  * @author Chalman
@@ -34,12 +32,5 @@ public class ModelView {
     }
     
 ///Fonctions 
-    @Method(url="index")
-    public ModelView getIndex() {
-        return new ModelView("index.jsp");
-    }
-    @Method(url="testFramework")
-    public ModelView getTestFramework() {
-        return new ModelView("testFramework.jsp");
-    }
+
 }

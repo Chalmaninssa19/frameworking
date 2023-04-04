@@ -5,6 +5,7 @@
 package model;
 
 import etu1960.framework.annotation.Method;
+import etu1960.framework.modelView.ModelView;
 
 /**
  *
@@ -70,5 +71,14 @@ public class Employe {
     @Method(url = "getsalaire")
     public void salaire() {
         System.out.println(this.getSalaire());
+    }
+    
+    @Method(url="index")
+    public ModelView getIndex() {
+        return new ModelView("index.jsp");
+    }
+    @Method(url="getEmploye")
+    public ModelView getEmploye() {
+        return new ModelView("employe.jsp");
     }
 }
