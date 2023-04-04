@@ -1,1 +1,2 @@
-jar -cvf .\framework.jar .\src\java\etu1960\
+jar -cf .\framework.jar -C .\build\web\WEB-INF\classes\ etu1960
+jar -cf C:\MyWebServer\apache-tomcat-8.5.75\apache-tomcat-8.5.75\webapps\framework.war -C C:\Users\Chalman\Documents\java\s4\testFramework\build\web\ .
