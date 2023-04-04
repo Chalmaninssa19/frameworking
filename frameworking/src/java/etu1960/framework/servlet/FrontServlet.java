@@ -56,7 +56,14 @@ public class FrontServlet extends HttpServlet {
                     for(int i = 0; i < allClass.size(); i++) {
                         if(allClass.get(i).getName().equals(this.mappingUrls.get(view).getClassName())) {
                             java.lang.reflect.Method method =  (java.lang.reflect.Method)allClass.get(i).getDeclaredMethod(this.mappingUrls.get(view).getMethod(), new Class[0]);
-                            //System.out.println("io -> " + allView.get(0).getTypeName());
+
+                            ModelView modelView = (ModelView)method.invoke(allClass.get(i).newInstance(), new Object[0]);
+                            String viewName =  modelView.getUrl();
+                            System.out.println("tonga -> " + modelView.getDatas());
+                            HashMap<String, Object> datas = modelView.getDatas();
+                            for ( HashMap.Entry<String, Object> data : datas.entrySet()) {
+                                request.setAttribute(data.getKey(), data.getValue());
+                            }
                             ModelView modelView = (ModelView)method.invoke(allClass.get(0).newInstance(), new Object[0]);
                             String viewName =  modelView.getView();
                             RequestDispatcher dispat = request.getRequestDispatcher("/pages/" + viewName);
@@ -64,20 +71,6 @@ public class FrontServlet extends HttpServlet {
                         }
                     }
                 }
-            /*if(Reflect.isMethodAnnotated(allView.get(0), allView.get(0).getDeclaredMethods()[i].getName(), Method.class)) {     
-                String url = allView.get(0).getDeclaredMethods()[i].getAnnotation(Method.class).url();
-                String methodName = allView.get(0).getDeclaredMethods()[i].getName();
-                if(url.equalsIgnoreCase(view)) {
-                    java.lang.reflect.Method method =  (java.lang.reflect.Method)allView.get(0).getDeclaredMethod(methodName, new Class[0]);
-                    //System.out.println("io -> " + allView.get(0).getTypeName());
-                    ModelView modelView = (ModelView)method.invoke(allView.get(0).newInstance(), new Object[0]);
-                    String viewName =  modelView.getView();
-                 
-                    //RequestDispatcher dispat = request.getRequestDispatcher("../" + viewName);
-                    //dispat.forward(request, response);
-                }
-            }*/
-           
          } catch(Exception e) {
              e.printStackTrace();
          }
