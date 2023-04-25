@@ -6,12 +6,15 @@ import etu1960.framework.modelView.ModelView;
 import etu1960.reflect.Reflect;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.Field;
+import java.sql.Date;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map.Entry;
 import javax.servlet.RequestDispatcher;
 
 /**
@@ -49,25 +52,37 @@ public class FrontServlet extends HttpServlet {
             out.println("<h1>Argument " + request.getQueryString()+ "</h1>");
             out.println("</body>");
             int size = req.length;
-            String view = req[size-1];
+            String view = req[size-1];  //Recuperer l'URl
+            //Est-ce que cette  methode existe 
+            
            // ArrayList<Class<?>> allView = Reflect.findModelView();
-                if(this.mappingUrls.get(view) != null) {
+                if(this.mappingUrls.get(view) != null) {    //Si le mappingUrls n'est pas vide(l'attribut mappingUrls contient tous les informations du classe concerne)
                     ArrayList<Class<?>> allClass = Reflect.getAllClass();   //Recueperer toutes les classes du package model
                     for(int i = 0; i < allClass.size(); i++) {
-                        if(allClass.get(i).getName().equals(this.mappingUrls.get(view).getClassName())) {
+                        if(allClass.get(i).getName().equals(this.mappingUrls.get(view).getClassName())) {   //Si la classe existe
                             java.lang.reflect.Method method =  (java.lang.reflect.Method)allClass.get(i).getDeclaredMethod(this.mappingUrls.get(view).getMethod(), new Class[0]);
-
-                            ModelView modelView = (ModelView)method.invoke(allClass.get(i).newInstance(), new Object[0]);
-                            String viewName =  modelView.getUrl();
-                            System.out.println("tonga -> " + modelView.getDatas());
-                            HashMap<String, Object> datas = modelView.getDatas();
-                            for ( HashMap.Entry<String, Object> data : datas.entrySet()) {
-                                request.setAttribute(data.getKey(), data.getValue());
+                            //Depuis une vue vers le backend
+                            if(request.getParameterMap().entrySet().isEmpty() == false) {
+                                 Object obj = allClass.get(i).newInstance();
+                                for(Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
+                                    String name = entry.getKey();
+                                    String value = entry.getValue()[0];
+                                    this.executeSetters(obj, name, value);
+                                }
+                                method.invoke(obj,null);
                             }
-                            ModelView modelView = (ModelView)method.invoke(allClass.get(0).newInstance(), new Object[0]);
-                            String viewName =  modelView.getView();
-                            RequestDispatcher dispat = request.getRequestDispatcher("/pages/" + viewName);
-                            dispat.forward(request, response);
+                            else {  //Depuis le backend vers la vue
+                                System.out.println("Tafiditra");
+                                ModelView modelView = (ModelView)method.invoke(allClass.get(i).newInstance(), new Object[0]);
+                                String viewName =  modelView.getUrl();
+                                HashMap<String, Object> datas = modelView.getDatas();
+                                for ( HashMap.Entry<String, Object> data : datas.entrySet()) {
+                                    request.setAttribute(data.getKey(), data.getValue());
+                                }
+                                RequestDispatcher dispat = request.getRequestDispatcher("/pages/" + viewName);
+                                dispat.forward(request, response);
+                            }
+                            System.out.println("Mandeha -> " + request.getParameterMap().entrySet().isEmpty());
                         }
                     }
                 }
@@ -85,9 +100,9 @@ public class FrontServlet extends HttpServlet {
                     insertHashMap(hashLists, allClass.get(i));  //Inserer dans hashLists les donnees HashMap
                 }
             }           
-            System.out.println("Mandeha");
+
             this.mappingUrls = hashLists; 
-            display(this.mappingUrls); //Afficher le hashMap
+            //display(this.mappingUrls); //Afficher le hashMap
           
         } catch(Exception e) {
             e.printStackTrace();
@@ -105,14 +120,46 @@ public class FrontServlet extends HttpServlet {
         }
     }
     
-    //Afficher le HashMap dans l'argument
+//Executer les setters 
+    public void executeSetters(Object empl, String nom, String value) throws Exception {
+        Class emp = empl.getClass();
+        if ( value != null ) {
+            if( emp.getDeclaredField(nom) != null) {
+                 Field field = emp.getDeclaredField(nom);
+                Class type = field.getType();
+                if (type == String.class) {
+                    java.lang.reflect.Method methode = emp.getDeclaredMethod("set" + nom, String.class);
+                    methode.invoke(empl, value);
+                }
+                if (type == Integer.class) {
+                    java.lang.reflect.Method methode = emp.getDeclaredMethod("set" + nom, Integer.class);
+                    methode.invoke(empl, Integer.valueOf(value));
+                }
+                if (type == Date.class) {
+                    java.lang.reflect.Method methode = emp.getDeclaredMethod("set" + nom, Date.class);
+                    methode.invoke(empl, Date.valueOf(value));
+                }
+                if (type == Double.class) {
+                    java.lang.reflect.Method methode = emp.getDeclaredMethod("set" + nom, Double.class);
+                    methode.invoke(empl, Double.valueOf(value));
+                }
+            }
+            else {
+                throw new Exception("Field null");
+            }
+        }
+        else {
+            throw new Exception("Completer les champs");
+        }
+    }
+   /* //Afficher le HashMap dans l'argument
     public void display(HashMap<String, Mapping> hashLists) {
         for ( HashMap.Entry<String, Mapping> entry : this.mappingUrls.entrySet()) {
             System.out.println("Nom de url : " + entry.getKey());
             System.out.println("Nom du classe : " + entry.getValue().getClassName());
             System.out.println("Nom du methode : " + entry.getValue().getMethod());
         }
-    }
+    }*/
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
      * Handles the HTTP <code>GET</code> method.
