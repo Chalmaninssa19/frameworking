@@ -6,6 +6,7 @@ package model;
 
 import etu1960.framework.annotation.Method;
 import etu1960.framework.modelView.ModelView;
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -14,47 +15,65 @@ import java.util.HashMap;
  * @author chalman
  */
 public class Employe {
-    String nom;
-    int age;
-    double salaire;
+    String Nom;
+    Integer Age;
+    Double Salaire;
+    Date Dtn;
+    String Dept;
     
     ///Getters et setters
 
     public String getNom() {
-        return nom;
+        return Nom;
     }
 
-    public void setNom(String nom) {
-        this.nom = nom;
+    public void setNom(String Nom) {
+        this.Nom = Nom;
     }
 
-    public int getAge() {
-        return age;
+    public Integer getAge() {
+        return Age;
     }
 
-    public void setAge(int age) {
-        this.age = age;
+    public void setAge(Integer Age) {
+        this.Age = Age;
     }
 
-    public double getSalaire() {
-        return salaire;
+    public Double getSalaire() {
+        return Salaire;
     }
 
-    public void setSalaire(double salaire) {
-        this.salaire = salaire;
+    public void setSalaire(Double Salaire) {
+        this.Salaire = Salaire;
     }
-    
-    
+
+    public Date getDtn() {
+        return Dtn;
+    }
+
+    public void setDtn(Date Dtn) {
+        this.Dtn = Dtn;
+    }
+
+    public String getDept() {
+        return Dept;
+    }
+
+    public void setDept(String Dept) {
+        this.Dept = Dept;
+    } 
     
     ///Constructors
 
     public Employe() {
     }
 
-    public Employe(String nom, int age, double salaire) {
-        this.nom = nom;
-        this.age = age;
-        this.salaire = salaire;
+    public Employe(String Nom, Integer Age, Double Salaire, Date Dtn, String Dept) {
+        this.Nom = Nom;
+        this.Age = Age;
+        this.Salaire = Salaire;
+        this.Dtn = Dtn;
+        this.Dept = Dept;
     }
 
     ///Focntions de la classe
@@ -91,5 +110,14 @@ public class Employe {
         lists.add("Irving");
         
         return lists;
+    }
+    
+    @Method(url="emp-save")
+    public void save() {
+        System.out.println("Nom : " + this.getNom());
+        System.out.println("Prenom : " + this.getAge());
+        System.out.println("Date de naissance : " + this.getDtn());
+        System.out.println("Salaire : " + this.getSalaire());
+        System.out.println("Dept : " + this.getDept());
     }
 }
