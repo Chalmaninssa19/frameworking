@@ -92,7 +92,7 @@ public class Employe {
         System.out.println(this.getSalaire());
     }
 
-    @Method(url="getEmploye")
+    @Method(url="v_employe")
     public ModelView getEmploye() {
         ModelView view = new ModelView("employe.jsp");
         view.addItem("listes", listsEmploye());
@@ -112,12 +112,17 @@ public class Employe {
         return lists;
     }
     
-    @Method(url="emp-save")
-    public void save() {
-        System.out.println("Nom : " + this.getNom());
-        System.out.println("Prenom : " + this.getAge());
-        System.out.println("Date de naissance : " + this.getDtn());
-        System.out.println("Salaire : " + this.getSalaire());
-        System.out.println("Dept : " + this.getDept());
+    @Method(url="b_emp-save")
+    public void save(String nom, String dept) {
+        System.out.println("Bonjour " + nom);
+        System.out.println("Departement : " + dept);
+        //System.out.println("Age : " + age);
+        //System.out.println("Date de naissance : " + dtn);
+    }
+    @Method(url="b_emp-verify")
+    public void verify() {
+        System.out.println("Nom : " + getNom());
+        System.out.println("Salaire : " + getSalaire());
+          System.out.println("Date : " + getDtn());
     }
 }
