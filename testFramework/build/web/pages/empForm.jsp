@@ -35,6 +35,14 @@
                 <input type="text" name="Dept"value="Informatique"/>
             </p>
              <p>
+                <label>Choisir les langues que vous parlez :</label>
+                <input type="checkbox" name="Langues" value="Francais"/>Francais
+                <input type="checkbox" name="Langues" value="Anglais"/>Anglais
+                <input type="checkbox" name="Langues" value="Malagasy"/>Malagasy
+                <input type="checkbox" name="Langues" value="Chinois"/>Chinois
+                <input type="checkbox" name="Langues" value="Allemand"/>Allemand
+            </p>
+             <p>
                 <input type="submit" value="valider" />
             </p>
         </form>

@@ -55,10 +55,8 @@ public class FrontServlet extends HttpServlet {
             out.println("</body>");
             int size = req.length;
             String view = req[size-1];  //Recuperer l'URl
-            
-            //Traitement des requetes
             traitement(view, request, response);
-            
+         
          } catch(Exception e) {
              e.printStackTrace();
          }
@@ -96,7 +94,7 @@ public class FrontServlet extends HttpServlet {
         }
     }
     
-//return les objets d'arguments  
+    //return les objets d'arguments  
     public Object [] getArguments(String [] args) throws Exception {
         Object [] arguments = new Object[args.length];
         for(int i =0;i<args.length;i++) {
@@ -105,38 +103,57 @@ public class FrontServlet extends HttpServlet {
         }
         return arguments;
     }
-//Executer les setters 
-    public void executeSetters(Object empl, String nom, String value) throws Exception {
+    
+    //Executer les setters 
+    public void executeSetters(Object empl, String nom, String [] value) throws Exception {
         Class emp = empl.getClass();
-        if ( value != null ) {
+        if ( value[0] != null) {
             if( emp.getDeclaredField(nom) != null) {
                  Field field = emp.getDeclaredField(nom);
                 Class type = field.getType();
                 if (type == String.class) {
                     java.lang.reflect.Method methode = emp.getDeclaredMethod("set" + nom, String.class);
-                    methode.invoke(empl, value);
+                    methode.invoke(empl, value[0]);
                 }
                 if (type == Integer.class) {
                     java.lang.reflect.Method methode = emp.getDeclaredMethod("set" + nom, Integer.class);
-                    methode.invoke(empl, Integer.valueOf(value));
+                    methode.invoke(empl, Integer.valueOf(value[0]));
                 }
                 if (type == Date.class) {
                     java.lang.reflect.Method methode = emp.getDeclaredMethod("set" + nom, Date.class);
-                    methode.invoke(empl, Date.valueOf(value));
+                    methode.invoke(empl, Date.valueOf(value[0]));
                 }
                 if (type == Double.class) {
                     java.lang.reflect.Method methode = emp.getDeclaredMethod("set" + nom, Double.class);
-                    methode.invoke(empl, Double.valueOf(value));
+                    methode.invoke(empl, Double.valueOf(value[0]));
                 }
-            }
-            else {
-                throw new Exception("Field null");
             }
         }
         else {
             throw new Exception("Completer les champs");
         }
     }
+    
+    //Avoir les valeurs d'un champ formulaire
+    public String [] getValuesChamps(String nameChamp, HttpServletRequest request) throws Exception {
+        return request.getParameterValues(nameChamp);
+    }
+    
+    //Executer une methode qui demande en parametre un tableau
+    public void executeSettersTab(Object empl, String nom, Object value) throws Exception {
+        Class emp = empl.getClass();
+
+        // Obtenir la classe du type d'élément du tableau
+        Class<?> typeElement = value.getClass();
+
+
+        java.lang.reflect.Method methode = emp.getMethod("set"+nom, typeElement);
+        
+        // Appelez la méthode setter avec le tableau converti
+        methode.invoke(empl, (Object)value);
+    }
+    
+    //Caster un valeur
     public Object castingValues(String types, String values) throws Exception {
         if(types.equals("java.lang.String")) {
             return values;
@@ -152,7 +169,18 @@ public class FrontServlet extends HttpServlet {
         }
          return null;
     }
-///Fonction pour traiter les requetes 
+    
+    //Est ce que la valeur est un tableau
+    public void isValueTable(Object obj, String name, String [] values) throws Exception {
+        if(values.length == 1) {
+            this.executeSetters(obj, name, values);
+        }
+        else {
+            this.executeSettersTab(obj, name, values);
+        }     
+    }
+   
+    //Traiter les requetes
     public void traitement(String view, HttpServletRequest request, HttpServletResponse response ) throws Exception {
             if(this.mappingUrls.get(view) != null) {    //Si le mappingUrls n'est pas vide(l'attribut mappingUrls contient tous les informations du classe concerne)
                     ArrayList<Class<?>> allClass = Reflect.getAllClass();   //Recueperer toutes les classes du package model
@@ -177,8 +205,8 @@ public class FrontServlet extends HttpServlet {
                                                 Object obj = allClass.get(i).newInstance();
                                                 for(Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
                                                     String name = entry.getKey();
-                                                    String value = entry.getValue()[0];
-                                                    this.executeSetters(obj, name, value);
+                                                    String [] values = this.getValuesChamps(name, request);
+                                                    this.isValueTable(obj, name, values);
                                                 }
                                                 methods[j].invoke(obj,new Object[0]);
                                             }

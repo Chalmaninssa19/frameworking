@@ -8,7 +8,6 @@ import etu1960.framework.annotation.Method;
 import etu1960.framework.modelView.ModelView;
 import java.sql.Date;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  *
@@ -20,6 +19,7 @@ public class Employe {
     Double Salaire;
     Date Dtn;
     String Dept;
+    String [] Langues;
     
     ///Getters et setters
 
@@ -62,19 +62,29 @@ public class Employe {
     public void setDept(String Dept) {
         this.Dept = Dept;
     } 
+
+    public String[] getLangues() {
+        return Langues;
+    }
+
+    public void setLangues(String[] langues) {
+        this.Langues = langues;
+    }
     
     ///Constructors
 
     public Employe() {
     }
 
-    public Employe(String Nom, Integer Age, Double Salaire, Date Dtn, String Dept) {
+    public Employe(String Nom, Integer Age, Double Salaire, Date Dtn, String Dept, String[] langues) {
         this.Nom = Nom;
         this.Age = Age;
         this.Salaire = Salaire;
         this.Dtn = Dtn;
         this.Dept = Dept;
+        this.Langues = langues;
     }
+
 
     ///Focntions de la classe
     @Method(url = "getNom")
@@ -121,8 +131,19 @@ public class Employe {
     }
     @Method(url="b_emp-verify")
     public void verify() {
-        System.out.println("Nom : " + getNom());
-        System.out.println("Salaire : " + getSalaire());
-          System.out.println("Date : " + getDtn());
+        if(this.getNom() != null) {
+            System.out.println("Nom : " + getNom());   
+        }
+        if(this.getSalaire() != null) {
+            System.out.println("Salaire : " + getSalaire());   
+        }
+        if(this.getDtn() != null) {
+            System.out.println("Date : " + getDtn());   
+        }
+        if(this.getLangues() != null) {
+            for(int i = 0; i < this.getLangues().length; i++) {
+                System.out.println("Langue : "+this.getLangues()[i]);
+            }   
+        }
     }
 }
