@@ -8,7 +8,6 @@ import etu1960.framework.annotation.Method;
 import etu1960.framework.modelView.ModelView;
 import java.sql.Date;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  *
@@ -20,6 +19,7 @@ public class Employe {
     Double Salaire;
     Date Dtn;
     String Dept;
+    String [] Langues;
     
     ///Getters et setters
 
@@ -62,19 +62,29 @@ public class Employe {
     public void setDept(String Dept) {
         this.Dept = Dept;
     } 
+
+    public String[] getLangues() {
+        return Langues;
+    }
+
+    public void setLangues(String[] langues) {
+        this.Langues = langues;
+    }
     
     ///Constructors
 
     public Employe() {
     }
 
-    public Employe(String Nom, Integer Age, Double Salaire, Date Dtn, String Dept) {
+    public Employe(String Nom, Integer Age, Double Salaire, Date Dtn, String Dept, String[] langues) {
         this.Nom = Nom;
         this.Age = Age;
         this.Salaire = Salaire;
         this.Dtn = Dtn;
         this.Dept = Dept;
+        this.Langues = langues;
     }
+
 
     ///Focntions de la classe
     @Method(url = "getNom")
@@ -92,7 +102,7 @@ public class Employe {
         System.out.println(this.getSalaire());
     }
 
-    @Method(url="getEmploye")
+    @Method(url="v_employe")
     public ModelView getEmploye() {
         ModelView view = new ModelView("employe.jsp");
         view.addItem("listes", listsEmploye());
@@ -112,12 +122,28 @@ public class Employe {
         return lists;
     }
     
-    @Method(url="emp-save")
-    public void save() {
-        System.out.println("Nom : " + this.getNom());
-        System.out.println("Prenom : " + this.getAge());
-        System.out.println("Date de naissance : " + this.getDtn());
-        System.out.println("Salaire : " + this.getSalaire());
-        System.out.println("Dept : " + this.getDept());
+    @Method(url="b_emp-save")
+    public void save(String nom, String dept) {
+        System.out.println("Bonjour " + nom);
+        System.out.println("Departement : " + dept);
+        //System.out.println("Age : " + age);
+        //System.out.println("Date de naissance : " + dtn);
+    }
+    @Method(url="b_emp-verify")
+    public void verify() {
+        if(this.getNom() != null) {
+            System.out.println("Nom : " + getNom());   
+        }
+        if(this.getSalaire() != null) {
+            System.out.println("Salaire : " + getSalaire());   
+        }
+        if(this.getDtn() != null) {
+            System.out.println("Date : " + getDtn());   
+        }
+        if(this.getLangues() != null) {
+            for(int i = 0; i < this.getLangues().length; i++) {
+                System.out.println("Langue : "+this.getLangues()[i]);
+            }   
+        }
     }
 }

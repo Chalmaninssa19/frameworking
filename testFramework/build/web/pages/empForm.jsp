@@ -13,7 +13,7 @@
     </head>
     <body>
         <h1>Enregistrer un employe</h1>
-        <form action="emp-save" method="post">
+        <form action="b_emp-verify" method="post">
             <p>
                 <label>Nom :</label>
                 <input type="text" name="Nom" value='chalman'/>
@@ -33,6 +33,14 @@
             <p>
                 <label>Departement :</label>
                 <input type="text" name="Dept"value="Informatique"/>
+            </p>
+             <p>
+                <label>Choisir les langues que vous parlez :</label>
+                <input type="checkbox" name="Langues" value="Francais"/>Francais
+                <input type="checkbox" name="Langues" value="Anglais"/>Anglais
+                <input type="checkbox" name="Langues" value="Malagasy"/>Malagasy
+                <input type="checkbox" name="Langues" value="Chinois"/>Chinois
+                <input type="checkbox" name="Langues" value="Allemand"/>Allemand
             </p>
              <p>
                 <input type="submit" value="valider" />

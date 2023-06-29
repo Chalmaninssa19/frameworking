@@ -1,0 +1,4 @@
+-Ne marche que sur tomcat 8
+-Utiliser windows pour votre projet
+-Mettre dans un dossier nomme pages toutes les vues que vous allez utilise
+-Nom des attributs dans formulaire doit etre le meme que les attributs des classe 
