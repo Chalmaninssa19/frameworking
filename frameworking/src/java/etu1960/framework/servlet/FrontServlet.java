@@ -2,27 +2,34 @@ package etu1960.framework.servlet;
 
 import etu1960.framework.Mapping;
 import etu1960.framework.annotation.Method;
+import etu1960.framework.fileUpload.FileUpload;
 import etu1960.framework.modelView.ModelView;
 import etu1960.reflect.Reflect;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.nio.ByteBuffer;
 import java.sql.Date;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
-import java.util.Enumeration;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import javax.servlet.RequestDispatcher;
+import javax.servlet.annotation.MultipartConfig;
+import javax.servlet.http.Part;
+import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
 
 /**
  *
  * @author chalman
  */
+@MultipartConfig
 public class FrontServlet extends HttpServlet {
 
     /**
@@ -36,6 +43,7 @@ public class FrontServlet extends HttpServlet {
      */
 
     HashMap<String, Mapping> mappingUrls;
+
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) //toutes les requetes pointent vers ce fonction
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
@@ -79,15 +87,21 @@ public class FrontServlet extends HttpServlet {
             e.printStackTrace();
         }
     }
- 
+   
+///Encapsulation
+    public HashMap<String, Mapping> getMappingUrls() { 
+        return mappingUrls;
+    }
+    public void setMappingUrls(HashMap<String, Mapping> mappingUrls) {
+        this.mappingUrls = mappingUrls;
+    }
+
+
 ///Fonctions
     //inserer les donnees dans hashMap
     public void insertHashMap(HashMap<String, Mapping> hashLists, Class<?> className) {
         for(int i = 0; i < className.getDeclaredMethods().length; i++) {
-            //System.out.println("method -> " + className.getDeclaredMethods()[i].getName());
-            //System.out.println("url -> " + Reflect.isMethodAnnotated(className, className.getDeclaredMethods()[i].getName(), Method.class));
-            Annotation annotation = className.getDeclaredMethods()[i].getAnnotation(Method.class);
-            if (annotation != null) {
+            if(Reflect.isMethodAnnotated(className, className.getDeclaredMethods()[i].getName(), Method.class)) {                 
                 String url = className.getDeclaredMethods()[i].getAnnotation(Method.class).url();
                 hashLists.put(url, new Mapping(className.getName(), className.getDeclaredMethods()[i].getName()));
             }
@@ -172,61 +186,154 @@ public class FrontServlet extends HttpServlet {
     
     //Est ce que la valeur est un tableau
     public void isValueTable(Object obj, String name, String [] values) throws Exception {
-        if(values.length == 1) {
-            this.executeSetters(obj, name, values);
-        }
-        else {
-            this.executeSettersTab(obj, name, values);
-        }     
+        if(values != null) {
+            if(values.length == 1) {
+                this.executeSetters(obj, name, values);
+            }
+            else {
+                this.executeSettersTab(obj, name, values);
+            }     
+        }  
     }
    
-    //Traiter les requetes
-    public void traitement(String view, HttpServletRequest request, HttpServletResponse response ) throws Exception {
-            if(this.mappingUrls.get(view) != null) {    //Si le mappingUrls n'est pas vide(l'attribut mappingUrls contient tous les informations du classe concerne)
-                    ArrayList<Class<?>> allClass = Reflect.getAllClass();   //Recueperer toutes les classes du package model
-                    for(int i = 0; i < allClass.size(); i++) {
-                        if(allClass.get(i).getName().equals(this.mappingUrls.get(view).getClassName())) {   //Si la classe existe                               
-                            //Depuis une vue vers le backend
-                            if(view.contains("b_")) {   //Depuis la vue vers le backend
-                                    java.lang.reflect.Method [] methods = allClass.get(i).getDeclaredMethods();
-                                    for(int j = 0; j < methods.length; j++ ) {
-                                        if(this.mappingUrls.get(view).getMethod() == methods[j].getName()) {
-                                            if(request.getMethod().equals("GET")) { //Si la requete est de methode get
-                                                String [] arguments = request.getQueryString().split("&&");
-                                                Object [] objects = getArguments(arguments);
-                                                for(int k = 0; k < methods[j].getParameterTypes().length; k++) {
-                                                 System.out.println("parameter ="+ methods[j].getParameterTypes().toString());
-                                                    objects[k] = castingValues(methods[j].getParameterTypes()[k].getTypeName(),(String)objects[k]);
-                                                }
+    //Verifier si la requete contient un formulaire
+    public boolean isRequestContentFile(HttpServletRequest request) throws Exception {
+        boolean hasFile = ServletFileUpload.isMultipartContent(request);
+        if(hasFile) {
+            return true;
+        }
+        
+        return false; 
+    }
+    
+    //Avoir les bytes d'un fichier  
+    private byte[] getPartBytes(Part part) throws IOException {
+         int bufferSize = 8192;
+         byte[] buffer = new byte[bufferSize];
+         int bytesRead;
+         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
-                                                methods[j].invoke(allClass.get(i).newInstance(),objects);  
-                                            }
-                                            if(request.getMethod().equals("POST")) {    //Si la requete est de methode post
-                                                Object obj = allClass.get(i).newInstance();
-                                                for(Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
-                                                    String name = entry.getKey();
-                                                    String [] values = this.getValuesChamps(name, request);
-                                                    this.isValueTable(obj, name, values);
-                                                }
-                                                methods[j].invoke(obj,new Object[0]);
-                                            }
-                                        }
-                                    }
-                            }
-                            if(view.contains("v_")) {   //Depuis le backend ver la vue
-                                java.lang.reflect.Method method =  (java.lang.reflect.Method)allClass.get(i).getDeclaredMethod(this.mappingUrls.get(view).getMethod(), new Class[0]); 
-                                ModelView modelView = (ModelView)method.invoke(allClass.get(i).newInstance(), new Object[0]);
-                                String viewName =  modelView.getUrl();
-                                HashMap<String, Object> datas = modelView.getDatas();
-                                for ( HashMap.Entry<String, Object> data : datas.entrySet()) {
-                                    request.setAttribute(data.getKey(), data.getValue());
-                                }
-                                RequestDispatcher dispat = request.getRequestDispatcher("/pages/" + viewName);
-                                dispat.forward(request, response);
+         try (InputStream inputStream = part.getInputStream()) {
+             while ((bytesRead = inputStream.read(buffer)) != -1) {
+                 outputStream.write(buffer, 0, bytesRead);
+             }
+         }
+
+         return outputStream.toByteArray();
+     }
+
+    //Executer ces methodes lorsque c'est une requete Get
+    public void executeMethodGet(HttpServletRequest request, java.lang.reflect.Method method, Class classes) throws Exception {
+        String [] arguments = request.getQueryString().split("&&");
+        Object [] objects = getArguments(arguments);
+        for(int k = 0; k < method.getParameterTypes().length; k++) {
+            objects[k] = castingValues(method.getParameterTypes()[k].getTypeName(),(String)objects[k]);
+        }
+
+        method.invoke(classes.newInstance(),objects); 
+    }
+    
+    //Executer le setter du fichier part
+    public void executeSetterFile(Object obj, Part part) throws Exception {
+        // Traiter le fichier ici
+        String fileName = part.getSubmittedFileName();
+        byte [] allBytes = this.getPartBytes(part);
+        Field field = obj.getClass().getDeclaredField(part.getName());
+        Class type = field.getType();
+        if(type == FileUpload.class) {
+            FileUpload file = new FileUpload(fileName, allBytes);
+            java.lang.reflect.Method methode = obj.getClass().getDeclaredMethod("setFiles", FileUpload.class);
+            methode.invoke(obj, file);
+        }
+    }
+    
+    //Executer les setters de l'objet
+    public void executeSettersObject(HttpServletRequest request, Object obj, Part part) throws Exception {
+        String name = part.getName();
+        String [] values = this.getValuesChamps(name, request);
+        this.isValueTable(obj, name, values);
+    }
+    
+    //Execution des setters
+    public void executeSetters(HttpServletRequest request, Object obj) throws Exception {
+        for(Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
+            String name = entry.getKey();
+            String [] values = this.getValuesChamps(name, request);
+            this.isValueTable(obj, name, values);                                     
+        }
+    }
+
+    public boolean isFilePart(Part part) {
+        // Vérifier si la partie est de type fichier
+        String contentType = part.getContentType();
+        return contentType != null;
+    }
+    
+    //Executer ces methodes lorsque c'est une requete Post
+    public Object getObjectPost(HttpServletRequest request, java.lang.reflect.Method method, Class classes) throws Exception {
+        Object obj = classes.newInstance();
+        if(this.isRequestContentFile(request)) {    //si la requete contient de fichiers
+            // Récupérer tous les éléments du formulaire
+            Collection<Part> parts = request.getParts();
+            // Parcourir les éléments pour trouver le champ de fichier
+            for (Part part : parts) {
+                //System.out.println("Attribut : "+part.getName());
+                if (isFilePart(part)) {   //Si c'est un fichier
+                   executeSetterFile(obj, part);    //Executer la methode ddu setFiles  
+                }
+                else {
+                   executeSettersObject(request, obj, part);    //Executer les autres setters
+                }
+            }
+        }
+        else {  //Si la requete ne contient pas de fichier
+           executeSetters(request, obj);
+        }
+        
+        return obj;
+    }
+    
+    //Verifier quels genres de requetes nous recevront
+    public void executesRequetes(HttpServletRequest request, java.lang.reflect.Method method, Class classes) throws Exception {
+        if(request.getMethod().equals("GET")) { //Si la requete est de methode get
+            executeMethodGet(request, method, classes);
+        }
+        if(request.getMethod().equals("POST")) {    //Si la requete est de methode post
+            Object object = getObjectPost(request, method, classes);
+            method.invoke(object,new Object[0]);
+        }
+    }
+    
+
+    //Traiter les requetes
+    public void traitement(String view, HttpServletRequest request, HttpServletResponse response ) throws Exception { 
+        if(this.mappingUrls.get(view) != null) {    //Si le mappingUrls n'est pas vide(l'attribut mappingUrls contient tous les informations du classe concerne)
+            ArrayList<Class<?>> allClass = Reflect.getAllClass();   //Recueperer toutes les classes du package model
+            for(int i = 0; i < allClass.size(); i++) {
+                if(allClass.get(i).getName().equals(this.mappingUrls.get(view).getClassName())) {   //Si la classe existe dans le hashmap                              
+                    //Depuis une vue vers le backend
+                    if(view.contains("b_")) {   //Depuis la vue vers le backend
+                        java.lang.reflect.Method [] methods = allClass.get(i).getDeclaredMethods();
+                        for(int j = 0; j < methods.length; j++ ) {
+                            if(this.mappingUrls.get(view).getMethod() == methods[j].getName()) {
+                                this.executesRequetes(request, methods[j], allClass.get(i));                                               
                             }
                         }
                     }
+                    if(view.contains("v_")) {   //Depuis le backend ver la vue
+                        java.lang.reflect.Method method =  (java.lang.reflect.Method)allClass.get(i).getDeclaredMethod(this.mappingUrls.get(view).getMethod(), new Class[0]); 
+                        ModelView modelView = (ModelView)method.invoke(allClass.get(i).newInstance(), new Object[0]);
+                        String viewName =  modelView.getUrl();
+                        HashMap<String, Object> datas = modelView.getDatas();
+                        for ( HashMap.Entry<String, Object> data : datas.entrySet()) {
+                            request.setAttribute(data.getKey(), data.getValue());
+                        }
+                        RequestDispatcher dispat = request.getRequestDispatcher("/pages/" + viewName);
+                        dispat.forward(request, response);
+                    }         
                 }
+            }
+        }
     }
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
