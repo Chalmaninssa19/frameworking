@@ -5,14 +5,17 @@
 package model;
 
 import etu1960.framework.annotation.Method;
+import etu1960.framework.annotation.Model;
 import etu1960.framework.modelView.ModelView;
 import java.sql.Date;
 import java.util.ArrayList;
+import etu1960.framework.fileUpload.FileUpload;
 
 /**
  *
  * @author chalman
  */
+
 public class Employe {
     String Nom;
     Integer Age;
@@ -20,6 +23,8 @@ public class Employe {
     Date Dtn;
     String Dept;
     String [] Langues;
+    FileUpload files;
+    
     
     ///Getters et setters
 
@@ -69,6 +74,14 @@ public class Employe {
 
     public void setLangues(String[] langues) {
         this.Langues = langues;
+    }
+
+    public FileUpload getFiles() {
+        return files;
+    }
+
+    public void setFiles(FileUpload files) {
+        this.files = files;
     }
     
     ///Constructors
@@ -145,5 +158,12 @@ public class Employe {
                 System.out.println("Langue : "+this.getLangues()[i]);
             }   
         }
+        if(this.getFiles() != null) {
+            System.out.print("files : "+this.getFiles());
+        }
+    }
+    
+    public void addEmploye(Employe employe) {
+        System.out.println(employe);
     }
 }

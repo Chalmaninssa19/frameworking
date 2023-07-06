@@ -13,7 +13,7 @@
     </head>
     <body>
         <h1>Enregistrer un employe</h1>
-        <form action="b_emp-verify" method="post">
+        <form action="b_emp-verify" method="post" enctype="multipart/form-data">
             <p>
                 <label>Nom :</label>
                 <input type="text" name="Nom" value='chalman'/>
@@ -41,6 +41,10 @@
                 <input type="checkbox" name="Langues" value="Malagasy"/>Malagasy
                 <input type="checkbox" name="Langues" value="Chinois"/>Chinois
                 <input type="checkbox" name="Langues" value="Allemand"/>Allemand
+            </p>
+            <p>
+                <label>Fichier :</label>
+                <input type="file" name="files"/>
             </p>
              <p>
                 <input type="submit" value="valider" />
