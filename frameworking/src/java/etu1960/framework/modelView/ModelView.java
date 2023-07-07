@@ -15,6 +15,7 @@ public class ModelView {
     String url;
     HashMap<String, Object> datas = new HashMap<>();
     HashMap<String, Object> sessions = new HashMap<>();
+    boolean isJson;
     
 ///Getters et setters
     public String getUrl() {
@@ -36,6 +37,14 @@ public class ModelView {
     }
     public void setSessions(HashMap<String, Object> sessions) {
         this.sessions = sessions;
+    }
+
+    public boolean isIsJson() {
+        return isJson;
+    }
+
+    public void setIsJson(boolean isJson) {
+        this.isJson = isJson;
     }
     
 ///Constructors

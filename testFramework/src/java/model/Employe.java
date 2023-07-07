@@ -4,10 +4,11 @@
  */
 package model;
 
-import etu1960.framework.annotation.*;
+import etu1960.framework.annotation.*
 import etu1960.framework.annotation.Auth;
 import etu1960.framework.annotation.Method;
 import etu1960.framework.annotation.Model;
+import etu1960.framework.annotation.*;
 import etu1960.framework.modelView.ModelView;
 import java.sql.Date;
 import java.util.ArrayList;
@@ -97,7 +98,6 @@ public class Employe {
     }
     
     ///Constructors
-
     public Employe() {
     }
 
@@ -128,8 +128,10 @@ public class Employe {
     }
 
     @Method(url="v_employe")
+    @Auth
     public ModelView getEmploye() {
         ModelView view = new ModelView("employe.jsp");
+        view.setIsJson(true);
         view.addItem("listes", listsEmploye());
       
         String date = "2022-06-19";
