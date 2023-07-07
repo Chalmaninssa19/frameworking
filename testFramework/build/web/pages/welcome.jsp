@@ -16,5 +16,6 @@
         <p>Welcome to our page</p>
         <a href="v_getEmp">getAllEmp</a>
         <a href="v_deleteEmp">Supprimer</a>
+        <a href="v_profile">profile</a>
     </body>
 </html>

@@ -4,6 +4,7 @@ import etu1960.framework.Mapping;
 import etu1960.framework.annotation.Auth;
 import etu1960.framework.annotation.Method;
 import etu1960.framework.annotation.Model;
+import etu1960.framework.annotation.Session;
 import etu1960.framework.fileUpload.FileUpload;
 import etu1960.framework.modelView.ModelView;
 import etu1960.reflect.Reflect;
@@ -21,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import javax.servlet.RequestDispatcher;
@@ -51,7 +53,6 @@ public class FrontServlet extends HttpServlet {
     HashMap<String, Object> instance = new HashMap<>();
     String sessionAuth;
     String sessionProfile;
-    HashMap<String, Object> instance = new HashMap<>();
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) //toutes les requetes pointent vers ce fonction
             throws ServletException, IOException {
@@ -85,8 +86,7 @@ public class FrontServlet extends HttpServlet {
         try {
             this.sessionAuth = config.getInitParameter("authConnected");
             this.sessionProfile = config.getInitParameter("authProfile");
-             System.out.println("Session auth :"+config.getInitParameter("authConnected"));
-             System.out.println("Session profile :"+config.getInitParameter("authProfile"));
+
             ArrayList<Class<?>> allClass = Reflect.getAllClass();   //Recueperer toutes les classes du package model
             HashMap <String, Mapping> hashLists = new HashMap<>();  //Instanciation d'un hashMap
             for(int i = 0; i < allClass.size(); i++) { 
@@ -612,11 +612,104 @@ public class FrontServlet extends HttpServlet {
             field.set(myObject, null);
         }    
     }
+    
+///Authentification et session
+    //Verifier les authentifications
+    public void checkAuth(java.lang.reflect.Method method, HttpServletRequest request) throws Exception {
+        boolean isAnnotated = method.isAnnotationPresent(Auth.class);
+        Auth auth = method.getAnnotation(Auth.class);
+        
+        if(isAnnotated) {
+            System.out.println("Io : "+auth.profile());
+            if(request.getSession().getAttribute(this.sessionAuth) == null) {
+                throw new Exception("Vous devrez etre authentifie pour acceder a ce fonction");
+            }
+            if(!auth.profile().equals("") && (request.getSession().getAttribute(this.sessionProfile) == null || !request.getSession().getAttribute(this.sessionProfile).equals(auth.profile()))) {
+                
+                throw new Exception("Vous devriez etre "+auth.profile()+" pour acceder a cette fonction");
+            }
+        }
+    }
+    
+    //Lancer toutes les session depuis un model view
+    public void lanceSessions(ModelView view, HttpServletRequest request) throws Exception {
+        HashMap<String, Object> allSessions = view.getSessions();
+        System.out.println("View : "+view.getSessions());
+        HttpSession session = request.getSession();
+        for ( HashMap.Entry<String, Object> item : allSessions.entrySet()) {
+            session.setAttribute(item.getKey(), item.getValue());
+        }
+    } 
+    
+    //Avoir la methode d'une classe  par un string
+    public java.lang.reflect.Method getMethod(String nameMethod, Class classe) throws Exception {
+        for(int i = 0; i < classe.getDeclaredMethods().length; i++) {
+            if(classe.getDeclaredMethods()[i].getName().equals(nameMethod)) {
+                return classe.getDeclaredMethods()[i];
+            }
+        }
+        
+        return null;
+    }
+    
+    //Recuperer les types de parametres d'une methode
+    public Class<?>[] getParameterTypes( java.lang.reflect.Method methode) throws Exception {
+        return methode.getParameterTypes();
+    }
+    
+    //A-t-il besoin d'une session
+    public boolean isNeedSession(java.lang.reflect.Method methode) throws Exception {
+        if(this.isMethodAnnotated(methode, Session.class)) {
+            return true;
+        }
+        return false;
+    }
+    
+    //Ajouter les sessions
+    public void checkSession(HttpServletRequest request, Class classe, java.lang.reflect.Method methode) throws Exception {
+        if(isNeedSession(methode)) {
+            HttpSession session = request.getSession();
+            Enumeration<String> attributeNames = session.getAttributeNames();
+            java.lang.reflect.Method session_get = classe.getDeclaredMethod("getSessions", new Class[0]);
+            java.lang.reflect.Method session_set = classe.getDeclaredMethod("setSessions", HashMap.class);
+            HashMap<String, Object> sessionAll = new HashMap<>();
+            while(attributeNames.hasMoreElements()) {
+                String attributeName = attributeNames.nextElement();
+                Object attributevalue = session.getAttribute(attributeName);
+                sessionAll.put(attributeName, attributevalue);
+            }
+            session_set.invoke(classe.newInstance(), sessionAll);
+            System.out.println("session : "+session_get.invoke(classe.newInstance(), new Object[0]).toString());
+        }
+    }
+    
 ///Traiter les requetes
     public void traitement(String view, HttpServletRequest request, HttpServletResponse response ) throws Exception { 
         Mapping mapping = this.getMapping(view); //Recuper le mapping de l'url
+        HashMap<String, Mapping> allSessions = this.getMappingUrls();
+
         if(mapping != null) {
-            this.traitRequeteSingleton(mapping, request);
+            //this.traitRequeteSingleton(mapping, request);
+            Class classe = this.getClass(mapping.getClassName());
+            if(view.contains("v_")) {   //Depuis le backend ver la vue
+                //System.out.println("Methode : "+mapping.getClassName());
+                
+                //java.lang.reflect.Method methode = classe.getMethod(mapping.getMethod(), parameterTypes);
+                java.lang.reflect.Method methode = this.getMethod(mapping.getMethod(), classe);
+                //Class<?>[] parameterTypes = this.getParameterTypes(methode);
+                this.checkAuth(methode, request);
+                this.checkSession(request, classe, methode);
+                
+                ModelView modelView = (ModelView)this.executeMethodGet(request, methode, classe);
+                this.lanceSessions(modelView, request);
+                
+                HashMap<String, Object> datas = modelView.getDatas();
+                for ( HashMap.Entry<String, Object> data : datas.entrySet()) {
+                    request.setAttribute(data.getKey(), data.getValue());
+                }
+                RequestDispatcher dispat = request.getRequestDispatcher("/pages/" + modelView.getUrl());
+                dispat.forward(request, response);
+            }  
         }
 
         /*if(this.mappingUrls.get(view) != null) {    //Si le mappingUrls n'est pas vide(l'attribut mappingUrls contient tous les informations du classe concerne)

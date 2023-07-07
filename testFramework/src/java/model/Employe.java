@@ -4,6 +4,7 @@
  */
 package model;
 
+import etu1960.framework.annotation.*;
 import etu1960.framework.annotation.Auth;
 import etu1960.framework.annotation.Method;
 import etu1960.framework.annotation.Model;
@@ -11,6 +12,7 @@ import etu1960.framework.modelView.ModelView;
 import java.sql.Date;
 import java.util.ArrayList;
 import etu1960.framework.fileUpload.FileUpload;
+import java.util.HashMap;
 
 /**
  *
@@ -25,6 +27,7 @@ public class Employe {
     String Dept;
     String [] Langues;
     FileUpload files;
+    HashMap<String, Object> sessions = new HashMap<>();
     
     
     ///Getters et setters
@@ -83,6 +86,14 @@ public class Employe {
 
     public void setFiles(FileUpload files) {
         this.files = files;
+    }
+
+    public HashMap<String, Object> getSessions() {
+        return sessions;
+    }
+
+    public void setSessions(HashMap<String, Object> sessions) {
+        this.sessions = sessions;
     }
     
     ///Constructors
@@ -183,6 +194,15 @@ public class Employe {
     @Auth(profile="admin")
     public ModelView deleteEmp() {
         ModelView view = new ModelView("delete.jsp");
+        return view;
+    }
+
+    @Session
+    @Auth
+    @Method(url="v_profile")
+    public ModelView profile() {
+        ModelView view = new ModelView("profile.jsp");
+        
         return view;
     }
 }

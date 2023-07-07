@@ -1,6 +1,6 @@
 <%-- 
-    Document   : welcome
-    Created on : 06-Jul-2023, 21:29:09
+    Document   : profile
+    Created on : 07-Jul-2023, 16:49:42
     Author     : Chalman
 --%>
 
@@ -9,13 +9,9 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>Welome</title>
+        <title>Bienvenu sur votre profil</title>
     </head>
     <body>
         <h1>Hello World!</h1>
-        <p>Welcome to our page</p>
-        <a href="v_getEmp">getAllEmp</a>
-        <a href="v_deleteEmp">Supprimer</a>
-        <a href="v_profile">profile</a>
     </body>
 </html>

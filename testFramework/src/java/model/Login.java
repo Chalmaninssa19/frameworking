@@ -18,7 +18,7 @@ public class Login {
         if(profile.equals("user") && password.equals("user")) {
             ModelView view = new ModelView("welcome.jsp");          
             view.addSession("isConnected", true);
-            view.addSession("isConnected", "user");
+            view.addSession("profile", "user");
             return view;
         }
         
