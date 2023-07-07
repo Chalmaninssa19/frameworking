@@ -13,7 +13,7 @@
     </head>
     <body>
         <h1>Enregistrer un employe</h1>
-        <form action="b_emp-verify" method="post" enctype="multipart/form-data">
+        <form action="addEmploye" method="post" enctype="multipart/form-data">
             <p>
                 <label>Nom :</label>
                 <input type="text" name="Nom" value='chalman'/>
