@@ -5,7 +5,9 @@
  */
 package etu1960.framework.modelView;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  *
@@ -16,6 +18,8 @@ public class ModelView {
     HashMap<String, Object> datas = new HashMap<>();
     HashMap<String, Object> sessions = new HashMap<>();
     boolean isJson;
+    List<String> deletedSession = new ArrayList<>();
+    boolean invalidateSession = false;
     
 ///Getters et setters
     public String getUrl() {
@@ -46,6 +50,21 @@ public class ModelView {
     public void setIsJson(boolean isJson) {
         this.isJson = isJson;
     }
+    public List<String> getDeletedSession() {
+        return deletedSession;
+    }
+
+    public void setDeletedSession(List<String> deletedSession) {
+        this.deletedSession = deletedSession;
+    }
+
+    public boolean isInvalidateSession() {
+        return invalidateSession;
+    }
+    public void setInvalidateSession(boolean invalidateSession) {
+        this.invalidateSession = invalidateSession;
+    }
+    
     
 ///Constructors
     public ModelView() {

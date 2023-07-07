@@ -19,6 +19,9 @@
         <a href="v_profile">profile</a>
         <a href="v_employe">Voir JSON</a>
         <a href="v_getAll">JSON annote</a>
-        <a href="v_profile">profile</a>
+        <p>
+           <a href="v_deconnect">Se deconnecter</a>
+        </p>
+
     </body>
 </html>

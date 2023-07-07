@@ -3,8 +3,14 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
+            <file>file:/C:/Users/Chalman/Documents/java/s4/frameworking/web/WEB-INF/web.xml</file>
+            <file>file:/C:/Users/Chalman/Documents/java/s4/frameworking/src/java/etu1960/framework/annotation/Auth.java</file>
+            <file>file:/C:/Users/Chalman/Documents/java/s4/frameworking/src/java/etu1960/reflect/Reflect.java</file>
             <file>file:/C:/Users/Chalman/Documents/java/s4/frameworking/src/java/etu1960/framework/fileUpload/FileUpload.java</file>
+            <file>file:/C:/Users/Chalman/Documents/java/s4/frameworking/src/java/etu1960/framework/annotation/Json.java</file>
             <file>file:/C:/Users/Chalman/Documents/java/s4/frameworking/src/java/etu1960/framework/servlet/FrontServlet.java</file>
+            <file>file:/C:/Users/Chalman/Documents/java/s4/frameworking/src/java/etu1960/framework/modelView/ModelView.java</file>
+            <file>file:/C:/Users/Chalman/Documents/java/s4/frameworking/src/java/etu1960/framework/annotation/Method.java</file>
         </group>
     </open-files>
 </project-private>

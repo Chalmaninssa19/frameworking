@@ -219,4 +219,13 @@ public class Employe {
         
         return view;
     }
+    
+    @Method(url="v_deconnect")
+    @Auth
+    public ModelView deconnect() {
+        ModelView view = new ModelView("pageLogin.jsp");
+        view.setInvalidateSession(true);
+        
+        return view;
+    }
 }
