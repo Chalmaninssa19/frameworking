@@ -4,6 +4,7 @@
  */
 package model;
 
+import etu1960.framework.annotation.Auth;
 import etu1960.framework.annotation.Method;
 import etu1960.framework.annotation.Model;
 import etu1960.framework.modelView.ModelView;
@@ -169,5 +170,19 @@ public class Employe {
         System.out.println("Nom : "+this.getNom());
         System.out.println("Dept : "+this.getAge());
         System.out.println("Date : "+this.getDtn());
+    }
+    
+    @Method(url="v_getEmp")
+    @Auth
+    public ModelView getAllEmp() {
+        ModelView view = new ModelView("auth.jsp");
+        return view;
+    }
+    
+    @Method(url="v_deleteEmp")
+    @Auth(profile="admin")
+    public ModelView deleteEmp() {
+        ModelView view = new ModelView("delete.jsp");
+        return view;
     }
 }
