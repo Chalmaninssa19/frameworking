@@ -3,6 +3,7 @@ package etu1960.framework.servlet;
 import etu1960.framework.Mapping;
 import etu1960.framework.annotation.Auth;
 import etu1960.framework.annotation.Method;
+import etu1960.framework.annotation.Model;
 import etu1960.framework.fileUpload.FileUpload;
 import etu1960.framework.modelView.ModelView;
 import etu1960.reflect.Reflect;
@@ -47,12 +48,10 @@ public class FrontServlet extends HttpServlet {
      */
 
     HashMap<String, Mapping> mappingUrls;
-<<<<<<< Updated upstream
-=======
     HashMap<String, Object> instance = new HashMap<>();
     String sessionAuth;
     String sessionProfile;
->>>>>>> Stashed changes
+    HashMap<String, Object> instance = new HashMap<>();
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) //toutes les requetes pointent vers ce fonction
             throws ServletException, IOException {
@@ -80,12 +79,9 @@ public class FrontServlet extends HttpServlet {
          }
     }
 
-<<<<<<< Updated upstream
-    public void init() {
-=======
+
 ///Initialisation
     public void init(ServletConfig config) {
->>>>>>> Stashed changes
         try {
             this.sessionAuth = config.getInitParameter("authConnected");
             this.sessionProfile = config.getInitParameter("authProfile");
@@ -100,13 +96,12 @@ public class FrontServlet extends HttpServlet {
             }           
             
             this.mappingUrls = hashLists; 
-            //display(this.mappingUrls); //Afficher le hashMap
-          
+            this.initialiseSingleton();
         } catch(Exception e) {
             e.printStackTrace();
         }
     }
-   
+ 
 ///Encapsulation
     public HashMap<String, Mapping> getMappingUrls() { 
         return mappingUrls;
@@ -115,6 +110,12 @@ public class FrontServlet extends HttpServlet {
         this.mappingUrls = mappingUrls;
     }
 
+    public HashMap<String, Object> getInstance() {
+        return instance;
+    }
+    public void setInstance(HashMap<String, Object> instance) {    
+        this.instance = instance;
+    }
 
 ///Fonctions
     //inserer les donnees dans hashMap
@@ -148,7 +149,7 @@ public class FrontServlet extends HttpServlet {
     //Executer les setters 
     public void executeSetters(Object empl, String nom, String [] value) throws Exception {
         Class emp = empl.getClass();
-        if ( value[0] != null) {
+        if ( value[0] != null && value[0].trim().equals("") == false) {
             if( emp.getDeclaredField(nom) != null) {
                  Field field = emp.getDeclaredField(nom);
                 Class type = field.getType();
@@ -169,9 +170,6 @@ public class FrontServlet extends HttpServlet {
                     methode.invoke(empl, Double.valueOf(value[0]));
                 }
             }
-        }
-        else {
-            throw new Exception("Completer les champs");
         }
     }
     
@@ -301,7 +299,7 @@ public class FrontServlet extends HttpServlet {
     }
     
     //Executer ces methodes lorsque c'est une requete Post
-    public Object getObjectPost(HttpServletRequest request, java.lang.reflect.Method method, Class classes) throws Exception {
+    public Object getObject(HttpServletRequest request, Class classes) throws Exception {
         Object obj = classes.newInstance();
         if(this.isRequestContentFile(request)) {    //si la requete contient de fichiers
             // Récupérer tous les éléments du formulaire
@@ -330,17 +328,11 @@ public class FrontServlet extends HttpServlet {
             executeMethodGet(request, method, classes);
         }
         if(request.getMethod().equals("POST")) {    //Si la requete est de methode post
-            Object object = getObjectPost(request, method, classes);
+            Object object = getObject(request, classes);
             method.invoke(object,new Object[0]);
         }
     }
     
-
-<<<<<<< Updated upstream
-    //Traiter les requetes
-    public void traitement(String view, HttpServletRequest request, HttpServletResponse response ) throws Exception { 
-        if(this.mappingUrls.get(view) != null) {    //Si le mappingUrls n'est pas vide(l'attribut mappingUrls contient tous les informations du classe concerne)
-=======
 ///Singleton
     //Inserer les classes singleton
     public void insertClassSingleton( Class classe) throws Exception {
@@ -517,7 +509,117 @@ public class FrontServlet extends HttpServlet {
         }
 
         /*if(this.mappingUrls.get(view) != null) {    //Si le mappingUrls n'est pas vide(l'attribut mappingUrls contient tous les informations du classe concerne)
->>>>>>> Stashed changes
+///Singleton
+    //Inserer les classes singleton
+    public void insertClassSingleton( Class classe) throws Exception {
+        this.getInstance().put(classe.getName(), classe.newInstance()); 
+    }
+    
+    //Initialisation d'une singleton
+    public void initialiseSingleton() throws Exception {
+        HashMap<String, Mapping> allClass = this.getMappingUrls();
+        for ( HashMap.Entry<String, Mapping> classe : allClass.entrySet()) {
+            if(this.getClass(classe.getValue().getClassName()) != null) {
+                Class classFinding = this.getClass(classe.getValue().getClassName());
+                if(isAnnotedToSingleton(classFinding)) {    //Si la classe est annote a une singleton
+                    this.insertClassSingleton(classFinding);
+                }
+            }
+        }
+    }
+    
+    //Traiter une requete singleton qui appelle une fonction
+    public void traitRequeteSingleton(Mapping mapping, HttpServletRequest request) throws Exception {
+        Class classe = this.getClass(mapping.getClassName());
+       
+        if(mapping != null) {
+           if(this.isClassInListSingleton(mapping.getClassName()) != null) {    //Si elle dans la liste des singletons
+                //Changer la valeur du mapping instance
+                Object object = this.getInstance().get(mapping.getClassName());
+
+                //Initialiser a null toutes les valeurs de son attribut
+                this.setNullField(this.getInstance().get(mapping.getClassName()));
+
+                //Avoir l'objet du requete
+                Object objRequest = this.getObject(request, object.getClass()); 
+                this.getInstance().put(mapping.getClassName(), objRequest);
+            }  
+           else {
+               Object objRequest = this.getObject(request, classe.getClass());  //Avoir l'objet de la requete
+               this.insertClassSingleton(classe); //Inserer l'objet dans la liste des singletons
+               this.getInstance().put(mapping.getClassName(), objRequest);
+           }
+        }
+        java.lang.reflect.Method methode = classe.newInstance().getClass().getDeclaredMethod(mapping.getMethod());
+        methode.invoke(this.getInstance().get(mapping.getClassName()), new Object[0]);
+    }
+    
+    //Trouver le mapping concerne par la cle
+    public Mapping getMapping(String key) {
+        if(this.getMappingUrls().get(key) != null) {
+            return this.getMappingUrls().get(key);
+        }
+        
+        return null;
+    }
+    
+    //Est ce que cette classe est annote a singleton
+    public boolean isAnnotedToSingleton(Class<?> myClass) throws Exception {       
+        boolean isAnnotated = myClass.isAnnotationPresent(Model.class);
+        
+        if (isAnnotated) {
+            // Obtenir l'annotation
+            Model annotation = myClass.getAnnotation(Model.class);
+            String value = annotation.value();
+            if(value.equals("singleton")) {
+                return true;
+            }
+        } 
+        
+        return false;
+    }
+    
+    //Avoir la classe par une chaine de caractere
+    public Class getClass(String nameClass) throws Exception {
+        try {
+            Class<?> myClass = Class.forName(nameClass);
+            
+            return myClass;
+
+        } catch (ClassNotFoundException e) {
+            return null;
+        }
+    }
+    
+    //Verfier si la classe est dans liste des singletons
+    public String isClassInListSingleton(String nameClasse) throws Exception {
+        HashMap<String, Object> allInstance = this.getInstance();
+        for ( HashMap.Entry<String, Object> instance : allInstance.entrySet()) {
+            if(instance.getKey().equals(nameClasse)) {
+                return instance.getKey();
+            }
+        }
+        
+        return null;
+    }
+    
+    //Mettre null toutes les valeurs d'attributs d'un objet
+    public void setNullField(Object myObject) throws Exception {
+        // Initialisation à null des valeurs des champs
+        Field[] fields = myObject.getClass().getDeclaredFields();
+        for (Field field : fields) {
+            field.setAccessible(true);  // Autoriser l'accès au champ privé si nécessaire
+            field.set(myObject, null);
+        }    
+    }
+///Traiter les requetes
+    public void traitement(String view, HttpServletRequest request, HttpServletResponse response ) throws Exception { 
+        Mapping mapping = this.getMapping(view); //Recuper le mapping de l'url
+        if(mapping != null) {
+            this.traitRequeteSingleton(mapping, request);
+        }
+
+        /*if(this.mappingUrls.get(view) != null) {    //Si le mappingUrls n'est pas vide(l'attribut mappingUrls contient tous les informations du classe concerne)
             ArrayList<Class<?>> allClass = Reflect.getAllClass();   //Recueperer toutes les classes du package model
             for(int i = 0; i < allClass.size(); i++) {
                 if(allClass.get(i).getName().equals(this.mappingUrls.get(view).getClassName())) {   //Si la classe existe dans le hashmap                              
@@ -533,7 +635,7 @@ public class FrontServlet extends HttpServlet {
                            
                 }
             }
-        }
+        }*/
     }
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
