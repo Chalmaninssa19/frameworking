@@ -15,7 +15,7 @@ import etu1960.framework.fileUpload.FileUpload;
  *
  * @author chalman
  */
-
+@Model("singleton")
 public class Employe {
     String Nom;
     Integer Age;
@@ -163,7 +163,11 @@ public class Employe {
         }
     }
     
-    public void addEmploye(Employe employe) {
-        System.out.println(employe);
+    @Method(url="addEmploye")
+    public void add() {
+        System.out.println("Dept : "+this.getDept());
+        System.out.println("Nom : "+this.getNom());
+        System.out.println("Dept : "+this.getAge());
+        System.out.println("Date : "+this.getDtn());
     }
 }
