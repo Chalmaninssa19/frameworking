@@ -4,10 +4,6 @@
  */
 package model;
 
-import etu1960.framework.annotation.*
-import etu1960.framework.annotation.Auth;
-import etu1960.framework.annotation.Method;
-import etu1960.framework.annotation.Model;
 import etu1960.framework.annotation.*;
 import etu1960.framework.modelView.ModelView;
 import java.sql.Date;
@@ -101,6 +97,13 @@ public class Employe {
     public Employe() {
     }
 
+    public Employe(String nom, Integer age, Double salaire, String dept) {
+        this.Nom = nom;
+        this.Age = age;
+        this.Salaire = salaire;
+        this.Dept = dept;
+    }
+    
     public Employe(String Nom, Integer Age, Double Salaire, Date Dtn, String Dept, String[] langues) {
         this.Nom = Nom;
         this.Age = Age;
@@ -138,6 +141,15 @@ public class Employe {
         view.addItem("date", date);
   
         return view;
+    }
+    
+    @Method(url="v_getAll")
+    @Auth
+    @Json
+    public Employe getEmp() {
+        Employe emp = new Employe("Jack", 12, 20000.0, "Informatique");
+  
+        return emp;
     }
     
     public ArrayList<String> listsEmploye() {
@@ -198,12 +210,21 @@ public class Employe {
         ModelView view = new ModelView("delete.jsp");
         return view;
     }
-
+    
     @Session
     @Auth
     @Method(url="v_profile")
     public ModelView profile() {
         ModelView view = new ModelView("profile.jsp");
+        
+        return view;
+    }
+    
+    @Method(url="v_deconnect")
+    @Auth
+    public ModelView deconnect() {
+        ModelView view = new ModelView("pageLogin.jsp");
+        view.setInvalidateSession(true);
         
         return view;
     }

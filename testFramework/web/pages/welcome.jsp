@@ -17,7 +17,10 @@
         <a href="v_getEmp">getAllEmp</a>
         <a href="v_deleteEmp">Supprimer</a>
         <a href="v_profile">profile</a>
-          <a href="v_employe">Voir JSON</a>
-        <a href="v_profile">profile</a>
+        <a href="v_employe">Voir JSON</a>
+        <a href="v_getAll">JSON annote</a>
+        <p>
+           <a href="v_deconnect">Se deconnecter</a>
+        </p>
     </body>
 </html>
