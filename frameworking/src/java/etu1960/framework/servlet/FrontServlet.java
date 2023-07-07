@@ -3,6 +3,7 @@ package etu1960.framework.servlet;
 import com.google.gson.Gson;
 import etu1960.framework.Mapping;
 import etu1960.framework.annotation.Auth;
+import etu1960.framework.annotation.Json;
 import etu1960.framework.annotation.Method;
 import etu1960.framework.annotation.Model;
 import etu1960.framework.annotation.Session;
@@ -86,7 +87,6 @@ public class FrontServlet extends HttpServlet {
         try {
             this.sessionAuth = config.getInitParameter("authConnected");
             this.sessionProfile = config.getInitParameter("authProfile");
-
             ArrayList<Class<?>> allClass = Reflect.getAllClass();   //Recueperer toutes les classes du package model
             HashMap <String, Mapping> hashLists = new HashMap<>();  //Instanciation d'un hashMap
             for(int i = 0; i < allClass.size(); i++) { 
@@ -332,7 +332,6 @@ public class FrontServlet extends HttpServlet {
             method.invoke(object,new Object[0]);
         }
     }
-    
 
 ///Singleton
     //Inserer les classes singleton
@@ -620,6 +619,7 @@ public class FrontServlet extends HttpServlet {
     public void traitement(String view, HttpServletRequest request, HttpServletResponse response ) throws Exception { 
         Mapping mapping = this.getMapping(view); //Recuper le mapping de l'url
         HashMap<String, Mapping> allSessions = this.getMappingUrls();
+        PrintWriter out = response.getWriter();
 
         if(mapping != null) {
             //this.traitRequeteSingleton(mapping, request);
@@ -633,15 +633,29 @@ public class FrontServlet extends HttpServlet {
                 this.checkAuth(methode, request);
                 this.checkSession(request, classe, methode);
                 
-                ModelView modelView = (ModelView)this.executeMethodGet(request, methode, classe);
-                this.lanceSessions(modelView, request);
-                
-                HashMap<String, Object> datas = modelView.getDatas();
-                for ( HashMap.Entry<String, Object> data : datas.entrySet()) {
-                    request.setAttribute(data.getKey(), data.getValue());
+                Object object = this.executeMethodGet(request, methode, classe);
+                if(object instanceof ModelView) {
+                    ModelView modelView = (ModelView)this.executeMethodGet(request, methode, classe);
+                    this.lanceSessions(modelView, request);
+                    if(modelView.isIsJson()) {
+                        Gson gson = new Gson();
+                        String json = gson.toJson(modelView.getDatas());
+                        out.print(json);
+                    }
+                    else {
+                       HashMap<String, Object> datas = modelView.getDatas();
+                        for ( HashMap.Entry<String, Object> data : datas.entrySet()) {
+                            request.setAttribute(data.getKey(), data.getValue());
+                        }
+                        RequestDispatcher dispat = request.getRequestDispatcher("/pages/" + modelView.getUrl());
+                        dispat.forward(request, response);   
+                    }
+                } 
+                else if (this.isMethodAnnotated(methode, Json.class)){
+                    Gson gson = new Gson();
+                    String json = gson.toJson(object);
+                    out.print(json);
                 }
-                RequestDispatcher dispat = request.getRequestDispatcher("/pages/" + modelView.getUrl());
-                dispat.forward(request, response);
             }  
         }
 
