@@ -332,7 +332,6 @@ public class FrontServlet extends HttpServlet {
             method.invoke(object,new Object[0]);
         }
     }
-    
 
 ///Singleton
     //Inserer les classes singleton
@@ -550,6 +549,7 @@ public class FrontServlet extends HttpServlet {
                         RequestDispatcher dispat = request.getRequestDispatcher("/pages/" + modelView.getUrl());
                         dispat.forward(request, response); 
                     }
+
                     else {
                        HashMap<String, Object> datas = modelView.getDatas();
                         for ( HashMap.Entry<String, Object> data : datas.entrySet()) {
