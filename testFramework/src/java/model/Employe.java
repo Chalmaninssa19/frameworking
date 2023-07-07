@@ -5,9 +5,6 @@
 package model;
 
 import etu1960.framework.annotation.*;
-import etu1960.framework.annotation.Auth;
-import etu1960.framework.annotation.Method;
-import etu1960.framework.annotation.Model;
 import etu1960.framework.modelView.ModelView;
 import java.sql.Date;
 import java.util.ArrayList;
@@ -97,10 +94,16 @@ public class Employe {
     }
     
     ///Constructors
-
     public Employe() {
     }
 
+    public Employe(String nom, Integer age, Double salaire, String dept) {
+        this.Nom = nom;
+        this.Age = age;
+        this.Salaire = salaire;
+        this.Dept = dept;
+    }
+    
     public Employe(String Nom, Integer Age, Double Salaire, Date Dtn, String Dept, String[] langues) {
         this.Nom = Nom;
         this.Age = Age;
@@ -128,14 +131,25 @@ public class Employe {
     }
 
     @Method(url="v_employe")
+    @Auth
     public ModelView getEmploye() {
         ModelView view = new ModelView("employe.jsp");
+        view.setIsJson(true);
         view.addItem("listes", listsEmploye());
       
         String date = "2022-06-19";
         view.addItem("date", date);
   
         return view;
+    }
+    
+    @Method(url="v_getAll")
+    @Auth
+    @Json
+    public Employe getEmp() {
+        Employe emp = new Employe("Jack", 12, 20000.0, "Informatique");
+  
+        return emp;
     }
     
     public ArrayList<String> listsEmploye() {
@@ -196,7 +210,7 @@ public class Employe {
         ModelView view = new ModelView("delete.jsp");
         return view;
     }
-
+    
     @Session
     @Auth
     @Method(url="v_profile")
