@@ -1,5 +1,6 @@
 package etu1960.framework.servlet;
 
+import com.google.gson.Gson;
 import etu1960.framework.Mapping;
 import etu1960.framework.annotation.Auth;
 import etu1960.framework.annotation.Method;
@@ -79,14 +80,16 @@ public class FrontServlet extends HttpServlet {
          }
     }
 
-
 ///Initialisation
     public void init(ServletConfig config) {
         try {
             this.sessionAuth = config.getInitParameter("authConnected");
             this.sessionProfile = config.getInitParameter("authProfile");
+<<<<<<< Updated upstream
              System.out.println("Session auth :"+config.getInitParameter("authConnected"));
              System.out.println("Session profile :"+config.getInitParameter("authProfile"));
+=======
+>>>>>>> Stashed changes
             ArrayList<Class<?>> allClass = Reflect.getAllClass();   //Recueperer toutes les classes du package model
             HashMap <String, Mapping> hashLists = new HashMap<>();  //Instanciation d'un hashMap
             for(int i = 0; i < allClass.size(); i++) { 
@@ -333,6 +336,7 @@ public class FrontServlet extends HttpServlet {
         }
     }
     
+
 ///Singleton
     //Inserer les classes singleton
     public void insertClassSingleton( Class classe) throws Exception {
@@ -436,55 +440,15 @@ public class FrontServlet extends HttpServlet {
             field.set(myObject, null);
         }    
     }
-    
-///Authentification et session
-    //Verifier les authentifications
-    public void checkAuth(java.lang.reflect.Method method, HttpServletRequest request) throws Exception {
-        boolean isAnnotated = method.isAnnotationPresent(Auth.class);
-        Auth auth = method.getAnnotation(Auth.class);
-        
-        if(isAnnotated) {
-            System.out.println("Session auth :"+this.sessionAuth);
-             System.out.println("Session profile :"+this.sessionProfile);
-            if(request.getSession().getAttribute(this.sessionAuth) == null) {
-                throw new Exception("Vous devrez etre authentifie pour acceder a ce fonction");
-            }
-            if(auth.profile().equals("") && request.getSession().getAttribute(this.sessionProfile) == null || !request.getSession().getAttribute(this.sessionProfile).equals(auth.profile())) {
-                throw new Exception("Vous devriez etre "+auth.profile()+" pour acceder a cette fonction");
-            }
-        }
-    }
-    
-    //Lancer toutes les session depuis un model view
-    public void lanceSessions(ModelView view, HttpServletRequest request) throws Exception {
-        HashMap<String, Object> allSessions = view.getSessions();
-        System.out.println("View : "+view.getSessions());
-        HttpSession session = request.getSession();
-        for ( HashMap.Entry<String, Object> item : allSessions.entrySet()) {
-            session.setAttribute(item.getKey(), item.getValue());
-        }
-    } 
-    
-    //Avoir la methode d'une classe  par un string
-    public java.lang.reflect.Method getMethod(String nameMethod, Class classe) throws Exception {
-        for(int i = 0; i < classe.getDeclaredMethods().length; i++) {
-            if(classe.getDeclaredMethods()[i].getName().equals(nameMethod)) {
-                return classe.getDeclaredMethods()[i];
-            }
-        }
-        
-        return null;
-    }
-    
-    //Recuperer les types de parametres d'une methode
-    public Class<?>[] getParameterTypes( java.lang.reflect.Method methode) throws Exception {
-        return methode.getParameterTypes();
-    }
-    
 ///Traiter les requetes
     public void traitement(String view, HttpServletRequest request, HttpServletResponse response ) throws Exception { 
         Mapping mapping = this.getMapping(view); //Recuper le mapping de l'url
+<<<<<<< Updated upstream
+        if(mapping != null) {
+            this.traitRequeteSingleton(mapping, request);
+=======
         HashMap<String, Mapping> allSessions = this.getMappingUrls();
+        PrintWriter out = response.getWriter();
 
         if(mapping != null) {
             //this.traitRequeteSingleton(mapping, request);
@@ -496,127 +460,30 @@ public class FrontServlet extends HttpServlet {
                 java.lang.reflect.Method methode = this.getMethod(mapping.getMethod(), classe);
                 //Class<?>[] parameterTypes = this.getParameterTypes(methode);
                 this.checkAuth(methode, request);
+                this.checkSession(request, classe, methode);
+                
                 ModelView modelView = (ModelView)this.executeMethodGet(request, methode, classe);
                 this.lanceSessions(modelView, request);
-                
-                HashMap<String, Object> datas = modelView.getDatas();
-                for ( HashMap.Entry<String, Object> data : datas.entrySet()) {
-                    request.setAttribute(data.getKey(), data.getValue());
+                if(modelView.isIsJson()) {
+                                      System.out.println("Io");
+                       System.out.println("Tafiditra : "+modelView.getDatas().size());
+                    Gson gson = new Gson();
+                    System.out.println("Mandeha");
+                    String json = gson.toJson(modelView.getDatas());
+                    System.out.println("MAhay");
+                    System.out.println("Print : "+json);
+                    out.print(json);
                 }
-                RequestDispatcher dispat = request.getRequestDispatcher("/pages/" + modelView.getUrl());
-                dispat.forward(request, response);
-            }  
-        }
-
-        /*if(this.mappingUrls.get(view) != null) {    //Si le mappingUrls n'est pas vide(l'attribut mappingUrls contient tous les informations du classe concerne)
-///Singleton
-    //Inserer les classes singleton
-    public void insertClassSingleton( Class classe) throws Exception {
-        this.getInstance().put(classe.getName(), classe.newInstance()); 
-    }
-    
-    //Initialisation d'une singleton
-    public void initialiseSingleton() throws Exception {
-        HashMap<String, Mapping> allClass = this.getMappingUrls();
-        for ( HashMap.Entry<String, Mapping> classe : allClass.entrySet()) {
-            if(this.getClass(classe.getValue().getClassName()) != null) {
-                Class classFinding = this.getClass(classe.getValue().getClassName());
-                if(isAnnotedToSingleton(classFinding)) {    //Si la classe est annote a une singleton
-                    this.insertClassSingleton(classFinding);
+                else {
+                   HashMap<String, Object> datas = modelView.getDatas();
+                    for ( HashMap.Entry<String, Object> data : datas.entrySet()) {
+                        request.setAttribute(data.getKey(), data.getValue());
+                    }
+                    RequestDispatcher dispat = request.getRequestDispatcher("/pages/" + modelView.getUrl());
+                    dispat.forward(request, response);   
                 }
-            }
-        }
-    }
-    
-    //Traiter une requete singleton qui appelle une fonction
-    public void traitRequeteSingleton(Mapping mapping, HttpServletRequest request) throws Exception {
-        Class classe = this.getClass(mapping.getClassName());
-       
-        if(mapping != null) {
-           if(this.isClassInListSingleton(mapping.getClassName()) != null) {    //Si elle dans la liste des singletons
-                //Changer la valeur du mapping instance
-                Object object = this.getInstance().get(mapping.getClassName());
-
-                //Initialiser a null toutes les valeurs de son attribut
-                this.setNullField(this.getInstance().get(mapping.getClassName()));
-
-                //Avoir l'objet du requete
-                Object objRequest = this.getObject(request, object.getClass()); 
-                this.getInstance().put(mapping.getClassName(), objRequest);
             }  
-           else {
-               Object objRequest = this.getObject(request, classe.getClass());  //Avoir l'objet de la requete
-               this.insertClassSingleton(classe); //Inserer l'objet dans la liste des singletons
-               this.getInstance().put(mapping.getClassName(), objRequest);
-           }
-        }
-        java.lang.reflect.Method methode = classe.newInstance().getClass().getDeclaredMethod(mapping.getMethod());
-        methode.invoke(this.getInstance().get(mapping.getClassName()), new Object[0]);
-    }
-    
-    //Trouver le mapping concerne par la cle
-    public Mapping getMapping(String key) {
-        if(this.getMappingUrls().get(key) != null) {
-            return this.getMappingUrls().get(key);
-        }
-        
-        return null;
-    }
-    
-    //Est ce que cette classe est annote a singleton
-    public boolean isAnnotedToSingleton(Class<?> myClass) throws Exception {       
-        boolean isAnnotated = myClass.isAnnotationPresent(Model.class);
-        
-        if (isAnnotated) {
-            // Obtenir l'annotation
-            Model annotation = myClass.getAnnotation(Model.class);
-            String value = annotation.value();
-            if(value.equals("singleton")) {
-                return true;
-            }
-        } 
-        
-        return false;
-    }
-    
-    //Avoir la classe par une chaine de caractere
-    public Class getClass(String nameClass) throws Exception {
-        try {
-            Class<?> myClass = Class.forName(nameClass);
-            
-            return myClass;
-
-        } catch (ClassNotFoundException e) {
-            return null;
-        }
-    }
-    
-    //Verfier si la classe est dans liste des singletons
-    public String isClassInListSingleton(String nameClasse) throws Exception {
-        HashMap<String, Object> allInstance = this.getInstance();
-        for ( HashMap.Entry<String, Object> instance : allInstance.entrySet()) {
-            if(instance.getKey().equals(nameClasse)) {
-                return instance.getKey();
-            }
-        }
-        
-        return null;
-    }
-    
-    //Mettre null toutes les valeurs d'attributs d'un objet
-    public void setNullField(Object myObject) throws Exception {
-        // Initialisation à null des valeurs des champs
-        Field[] fields = myObject.getClass().getDeclaredFields();
-        for (Field field : fields) {
-            field.setAccessible(true);  // Autoriser l'accès au champ privé si nécessaire
-            field.set(myObject, null);
-        }    
-    }
-///Traiter les requetes
-    public void traitement(String view, HttpServletRequest request, HttpServletResponse response ) throws Exception { 
-        Mapping mapping = this.getMapping(view); //Recuper le mapping de l'url
-        if(mapping != null) {
-            this.traitRequeteSingleton(mapping, request);
+>>>>>>> Stashed changes
         }
 
         /*if(this.mappingUrls.get(view) != null) {    //Si le mappingUrls n'est pas vide(l'attribut mappingUrls contient tous les informations du classe concerne)

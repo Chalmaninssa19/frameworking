@@ -16,5 +16,10 @@
         <p>Welcome to our page</p>
         <a href="v_getEmp">getAllEmp</a>
         <a href="v_deleteEmp">Supprimer</a>
+<<<<<<< Updated upstream
+=======
+        <a href="v_profile">profile</a>
+          <a href="v_employe">Voir JSON</a>
+>>>>>>> Stashed changes
     </body>
 </html>
